@@ -20,16 +20,17 @@ export default function Header({ isAdmin = false }: { isAdmin?: boolean }) {
             Welcome, {profile?.full_name || profile?.email}
           </h1>
           <p className="mt-2 text-gray-600">
-          {isAdmin ? 'Manage social media content' : 'Review and approve your social media content'}
-        </p>
+            {isAdmin ? 'Manage social media content' : 'Review and approve your social media content'}
+          </p>
+        </div>
+        <button
+          onClick={signOut}
+          className="flex items-center px-4 py-2 text-gray-700 hover:text-black hover:bg-gray-100 rounded-lg transition-colors"
+        >
+          <LogOut className="w-5 h-5 mr-2" />
+          Log Out
+        </button>
       </div>
-      <button
-        onClick={signOut}
-        className="flex items-center px-4 py-2 text-gray-700 hover:text-black hover:bg-gray-100 rounded-lg transition-colors"
-      >
-        <LogOut className="w-5 h-5 mr-2" />
-        Log Out
-      </button>
     </div>
-  );
+  );  {/* Fechamento do return */}
 }
