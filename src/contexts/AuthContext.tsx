@@ -50,9 +50,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
-      options: {
-        captchaToken: true // Enable hCaptcha verification
-      }
     });
     if (error) throw error;
   }
