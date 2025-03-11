@@ -662,9 +662,12 @@ export default function Dashboard() {
           >
             Reject Content
           </button>
-        </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
-  </div>
-)}
-```
+  );
+}
