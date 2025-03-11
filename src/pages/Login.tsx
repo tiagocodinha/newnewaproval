@@ -27,7 +27,7 @@ export default function Login() {
           <img 
             src="https://lrytvlsyuvctghzqsjic.supabase.co/storage/v1/object/public/logo//Stagelink-logotipo-black.png" 
             alt="Stagelink Logo" 
-            className="h-24 mx-auto object-contain mb-8"
+            className="h-28 mx-auto object-contain mb-6"
           />
           <h2 className="text-3xl font-bold text-gray-900">
             Sign in to your account
