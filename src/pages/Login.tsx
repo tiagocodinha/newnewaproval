@@ -1,21 +1,36 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { LogIn } from 'lucide-react';
+import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
 
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const { executeRecaptcha } = useGoogleReCaptcha();
   const { signIn } = useAuth();
   const navigate = useNavigate();
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (!executeRecaptcha) {
+      setError('reCAPTCHA not yet available');
+      return;
+    }
+
+    setIsLoading(true);
+    setError('');
+
     try {
-      await signIn(email, password);
+      const recaptchaToken = await executeRecaptcha('login');
+      await signIn(email, password, recaptchaToken);
       navigate('/');
     } catch (error: any) {
       setError(error.message);
+    } finally {
+      setIsLoading(false);
     }
   }
 
@@ -74,9 +89,13 @@ export default function Login() {
           <div>
             <button
               type="submit"
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-black hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black"
+              disabled={isLoading}
+              className={`group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white ${
+                isLoading ? 'bg-gray-400 cursor-not-allowed' : 'bg-black hover:bg-gray-900'
+              } focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black`}
             >
-              Sign in
+              <LogIn className="w-5 h-5 mr-2" />
+              {isLoading ? 'Signing in...' : 'Sign in'}
             </button>
           </div>
         </form>
