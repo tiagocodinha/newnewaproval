@@ -24,8 +24,12 @@ export default function Login() {
     <div className="min-h-screen bg-white flex items-center justify-center p-4">
       <div className="max-w-md w-full space-y-8">
         <div className="text-center">
-          <LogIn className="mx-auto h-12 w-12 text-black" />
-          <h2 className="mt-6 text-3xl font-bold text-gray-900">
+          <img 
+            src="https://lrytvlsyuvctghzqsjic.supabase.co/storage/v1/object/public/logo//Stagelink-logotipo-black.png" 
+            alt="Stagelink Logo" 
+            className="h-24 mx-auto object-contain mb-8"
+          />
+          <h2 className="text-3xl font-bold text-gray-900">
             Sign in to your account
           </h2>
         </div>

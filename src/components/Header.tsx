@@ -11,7 +11,7 @@ export default function Header({ isAdmin = false }: { isAdmin?: boolean }) {
         <img 
           src="https://lrytvlsyuvctghzqsjic.supabase.co/storage/v1/object/public/logo//Stagelink-logotipo-black.png" 
           alt="Stagelink Logo" 
-          className="h-12 object-contain"
+          className="h-18 object-contain"
         />
       </div>
       <div className="flex justify-between items-center">
