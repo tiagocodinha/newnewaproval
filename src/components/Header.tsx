@@ -9,7 +9,7 @@ export default function Header({ isAdmin = false }: { isAdmin?: boolean }) {
     <div className="space-y-6">
       <div className="flex justify-center">
         <img 
-          src="/image/stagelinklogo.png" 
+          src="image/stagelinklogo.png" 
           alt="Stagelink Logo" 
           className="h-12 object-contain"
         />
