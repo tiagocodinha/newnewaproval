@@ -14,6 +14,8 @@ type ContentItem = {
   media_url: string;
   status: 'Approved' | 'Rejected' | 'Pending';
   schedule_date: string;
+  rejection_notes?: string;
+  rejected_at?: string;
   assigned_to_profile?: {
     email: string;
     full_name: string;
@@ -21,11 +23,12 @@ type ContentItem = {
 };
 
 export default function Dashboard() {
-  const { profile } = useAuth();
   const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [selectedType, setSelectedType] = useState<string>('all');
   const [selectedClient, setSelectedClient] = useState<string>('all');
   const [showForm, setShowForm] = useState(false);
+  const [rejectionNotes, setRejectionNotes] = useState<string>('');
+  const [rejectingItemId, setRejectingItemId] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     caption: '',
     content_type: 'Post',
@@ -34,6 +37,7 @@ export default function Dashboard() {
     assigned_to: '',
   });
 
+  const { profile } = useAuth();
   const isAdmin = profile?.email === 'geral@stagelink.pt';
   const today = startOfDay(new Date());
 
@@ -76,7 +80,6 @@ export default function Dashboard() {
     enabled: !!profile?.id,
   });
 
-  // Split content into current and archived
   const { currentContent, archivedContent } = contentItems.reduce((acc, item) => {
     const itemDate = startOfDay(parseISO(item.schedule_date));
     if (isBefore(itemDate, today)) {
@@ -123,12 +126,37 @@ export default function Dashboard() {
   };
 
   const handleStatusUpdate = async (id: string, status: 'Approved' | 'Rejected') => {
+    if (status === 'Rejected') {
+      setRejectingItemId(id);
+      setRejectionNotes('');
+      return;
+    }
+
     const { error } = await supabase
       .from('content_items')
       .update({ status })
       .eq('id', id);
 
     if (!error) {
+      refetch();
+    }
+  };
+
+  const handleReject = async () => {
+    if (!rejectingItemId || !rejectionNotes.trim()) return;
+
+    const { error } = await supabase
+      .from('content_items')
+      .update({
+        status: 'Rejected',
+        rejection_notes: rejectionNotes,
+        rejected_at: new Date().toISOString()
+      })
+      .eq('id', rejectingItemId);
+
+    if (!error) {
+      setRejectingItemId(null);
+      setRejectionNotes('');
       refetch();
     }
   };
@@ -177,12 +205,19 @@ export default function Dashboard() {
         <span>•</span>
         <span>{format(new Date(item.schedule_date), 'MMM d, yyyy')}</span>
       </div>
-      <div className={`text-sm font-medium ${
-        item.status === 'Approved' ? 'text-green-500' :
-        item.status === 'Rejected' ? 'text-red-500' :
-        'text-yellow-500'
-      }`}>
-        {item.status}
+      <div className="flex flex-col space-y-2">
+        <div className={`text-sm font-medium ${
+          item.status === 'Approved' ? 'text-green-500' :
+          item.status === 'Rejected' ? 'text-red-500' :
+          'text-yellow-500'
+        }`}>
+          {item.status}
+        </div>
+        {item.status === 'Rejected' && item.rejection_notes && (
+          <div className="text-sm text-gray-600 bg-gray-50 p-3 rounded-md">
+            <strong>Rejection Notes:</strong> {item.rejection_notes}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -303,7 +338,6 @@ export default function Dashboard() {
       );
     }
 
-    // Group items by year and month
     const itemsByYearAndMonth = archivedContent.reduce((acc, item) => {
       const year = format(new Date(item.schedule_date), 'yyyy');
       const month = format(new Date(item.schedule_date), 'MMMM');
@@ -569,6 +603,54 @@ export default function Dashboard() {
                   </button>
                 </div>
               </form>
+            </div>
+          </div>
+        )}
+
+        {rejectingItemId && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-bold">Rejection Notes</h2>
+                <button
+                  onClick={() => setRejectingItemId(null)}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Please provide a reason for rejection
+                  </label>
+                  <textarea
+                    value={rejectionNotes}
+                    onChange={(e) => setRejectionNotes(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
+                    rows={4}
+                    required
+                  />
+                </div>
+
+                <div className="flex justify-end space-x-3">
+                  <button
+                    type="button"
+                    onClick={() => setRejectingItemId(null)}
+                    className="px-4 py-2 text-gray-700 hover:text-gray-900"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleReject}
+                    disabled={!rejectionNotes.trim()}
+                    className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Reject Content
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         )}
