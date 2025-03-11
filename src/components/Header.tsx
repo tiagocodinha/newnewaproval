@@ -9,7 +9,7 @@ export default function Header({ isAdmin = false }: { isAdmin?: boolean }) {
     <div className="space-y-6">
       <div className="flex justify-center">
         <img 
-          src="image/stagelinklogo.png" 
+          src="https://lrytvlsyuvctghzqsjic.supabase.co/storage/v1/object/public/logo//Stagelink-logotipo-black.png" 
           alt="Stagelink Logo" 
           className="h-12 object-contain"
         />
