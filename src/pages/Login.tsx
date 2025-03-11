@@ -1,53 +1,19 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { useAuth } from "../contexts/AuthContext";
-
-const RECAPTCHA_SITE_KEY = "6LeYnfEqAAAAAPEXq1ju-2NEDO5jNdVS7pmUfsvz"; // TUA CHAVE PÚBLICA
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 
 export default function Login() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
   const { signIn } = useAuth();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    // Carregar reCAPTCHA Enterprise
-    const script = document.createElement("script");
-    script.src = `https://www.google.com/recaptcha/enterprise.js?render=${RECAPTCHA_SITE_KEY}`;
-    script.async = true;
-    document.body.appendChild(script);
-  }, []);
-
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-
-    if (!window.grecaptcha) {
-      setError("reCAPTCHA not loaded.");
-      return;
-    }
-
     try {
-      // Obter token do reCAPTCHA Enterprise
-      const token = await window.grecaptcha.enterprise.execute(RECAPTCHA_SITE_KEY, { action: "login" });
-
-      // Enviar o token para validação no backend
-      const recaptchaResponse = await fetch("https://www.approval.stagelink.pt/api/verify-recaptcha", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token }),
-      });
-
-      const recaptchaData = await recaptchaResponse.json();
-
-      if (!recaptchaData.success) {
-        setError("reCAPTCHA verification failed.");
-        return;
-      }
-
-      // Se reCAPTCHA for válido, proceder com login
       await signIn(email, password);
-      navigate("/");
+      navigate('/');
     } catch (error: any) {
       setError(error.message);
     }
@@ -57,9 +23,9 @@ export default function Login() {
     <div className="min-h-screen bg-white flex items-center justify-center px-4 py-8">
       <div className="w-full max-w-md space-y-6">
         <div className="text-center -mt-12 sm:-mt-20">
-          <img
-            src="https://lrytvlsyuvctghzqsjic.supabase.co/storage/v1/object/public/logo//Stagelink-logotipo-black.png"
-            alt="Stagelink Logo"
+          <img 
+            src="https://lrytvlsyuvctghzqsjic.supabase.co/storage/v1/object/public/logo//Stagelink-logotipo-black.png" 
+            alt="Stagelink Logo" 
             className="h-20 sm:h-28 mx-auto object-contain mb-4 sm:mb-6"
           />
           <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">
