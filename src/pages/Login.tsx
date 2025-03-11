@@ -1,7 +1,6 @@
-import React, { useRef, useState } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import HCaptcha from '@hcaptcha/react-hcaptcha'
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -13,18 +12,12 @@ export default function Login() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     try {
-      await signIn(email, password, options: { captchaToken },);
+      await signIn(email, password);
       navigate('/');
     } catch (error: any) {
       setError(error.message);
     }
   }
-  
-  const [captchaToken, setCaptchaToken] = useState()
-  const captcha = useRef()
-  captcha.current.resetCaptcha()
-
-
 
   return (
     <div className="min-h-screen bg-white flex items-center justify-center px-4 py-8">
@@ -85,15 +78,6 @@ export default function Login() {
             >
               Sign in
             </button>
-
-            <HCaptcha
-              ref={captcha}
-              sitekey="10229734-4292-43b2-b2e4-28b2321661b2"
-              onVerify={(token) => {
-                setCaptchaToken(token)
-              }}
-            />
-
           </div>
         </form>
       </div>
