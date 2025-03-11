@@ -5,7 +5,7 @@ import { supabase } from '../lib/supabase';
 interface AuthContextType {
   session: Session | null;
   profile: any | null;
-  signIn: (email: string, password: string, recaptchaToken: string) => Promise<void>;
+  signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
 }
 
@@ -46,13 +46,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setProfile(data);
   }
 
-  async function signIn(email: string, password: string, recaptchaToken: string) {
+  async function signIn(email: string, password: string) {
     const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
-      options: {
-        captchaToken: recaptchaToken
-      }
     });
     if (error) throw error;
   }
