@@ -7,11 +7,11 @@ import './index.css';
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <GoogleReCaptchaProvider
-      reCaptchaKey="6LeYnfEqAAAAPEXq1ju-2NEDO5jNdVS7pmUfsvz"
+      reCaptchaKey="6LeYnfEqAAAAAGVRUCJbZ5MsOWFSjArO0j3VML5"
       scriptProps={{
-        async: false,
-        defer: false,
-        appendTo: 'head',
+        async: true,
+        defer: true,
+        appendTo: 'body',
         nonce: undefined,
       }}
     >
