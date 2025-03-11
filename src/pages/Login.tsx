@@ -24,7 +24,7 @@ export default function Login() {
       <div className="w-full max-w-md space-y-6">
         <div className="text-center -mt-12 sm:-mt-20">
           <img 
-            src="https://lrytvlsyuvctghzqsjic.supabase.co/storage/v1/object/public/stagelink-logo.png" 
+            src="https://lrytvlsyuvctghzqsjic.supabase.co/storage/v1/object/public/logo//Stagelink-logotipo-black.png" 
             alt="Stagelink Logo" 
             className="h-20 sm:h-28 mx-auto object-contain mb-4 sm:mb-6"
           />
