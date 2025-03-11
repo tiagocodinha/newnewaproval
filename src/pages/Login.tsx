@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { LogIn } from 'lucide-react';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -21,19 +20,19 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen bg-white flex items-center justify-center p-4">
-      <div className="max-w-md w-full space-y-8">
-        <div className="text-center">
+    <div className="min-h-screen bg-white flex items-center justify-center px-4 py-8">
+      <div className="w-full max-w-md space-y-6">
+        <div className="text-center -mt-12 sm:-mt-20">
           <img 
-            src="https://lrytvlsyuvctghzqsjic.supabase.co/storage/v1/object/public/logo//Stagelink-logotipo-black.png" 
+            src="https://lrytvlsyuvctghzqsjic.supabase.co/storage/v1/object/public/stagelink-logo.png" 
             alt="Stagelink Logo" 
-            className="h-28 mx-auto object-contain mb-6"
+            className="h-20 sm:h-28 mx-auto object-contain mb-4 sm:mb-6"
           />
-          <h2 className="text-3xl font-bold text-gray-900">
+          <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">
             Sign in to your account
           </h2>
         </div>
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+        <form className="mt-6 sm:mt-8 space-y-4 sm:space-y-6" onSubmit={handleSubmit}>
           {error && (
             <div className="bg-red-50 text-red-500 p-3 rounded-md text-sm">
               {error}
