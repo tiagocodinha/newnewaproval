@@ -6,20 +6,20 @@ export default function Header({ isAdmin = false }: { isAdmin?: boolean }) {
   const { signOut, profile } = useAuth();
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <div className="flex justify-center">
         <img 
-          src="https://lrytvlsyuvctghzqsjic.supabase.co/storage/v1/object/public/logo//Stagelink-logotipo-black.png" 
+          src="https://lrytvlsyuvctghzqsjic.supabase.co/storage/v1/object/public/stagelink-logo.png" 
           alt="Stagelink Logo" 
-          className="h-18 object-contain"
+          className="h-16 sm:h-20 object-contain"
         />
       </div>
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">
+      <div className="flex flex-col sm:flex-row justify-between items-center gap-4 sm:gap-0">
+        <div className="text-center sm:text-left">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
             Welcome, {profile?.full_name || profile?.email}
           </h1>
-          <p className="mt-2 text-gray-600">
+          <p className="mt-1 sm:mt-2 text-sm sm:text-base text-gray-600">
             {isAdmin ? 'Manage social media content' : 'Review and approve your social media content'}
           </p>
         </div>
@@ -32,5 +32,5 @@ export default function Header({ isAdmin = false }: { isAdmin?: boolean }) {
         </button>
       </div>
     </div>
-  );  {/* Fechamento do return */}
+  );
 }
