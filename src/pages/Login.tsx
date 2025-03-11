@@ -88,6 +88,15 @@ export default function Login() {
             </div>
           </div>
 
+          <div className="flex justify-center">
+            <HCaptcha
+              ref={captchaRef}
+              sitekey="10229734-4292-43b2-b2e4-28b2321661b2"
+              onVerify={handleVerificationSuccess}
+              onExpire={() => setCaptchaToken(null)}
+            />
+          </div>
+
           <div>
             <button
               type="submit"
@@ -98,6 +107,7 @@ export default function Login() {
                   : 'bg-gray-400 cursor-not-allowed'
               } focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black`}
             >
+              <LogIn className="w-5 h-5 mr-2" />
               Sign in
             </button>
           </div>
