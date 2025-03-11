@@ -346,58 +346,58 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        <Header />
+      <div className="max-w-7xl mx-auto px-4 py-6 sm:py-8">
+        <Header isAdmin={isAdmin} />
 
-        <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
-          <div className="flex items-center space-x-4">
-            <div className="flex bg-white rounded-lg shadow-sm">
+        <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="w-full sm:w-auto overflow-x-auto pb-2 sm:pb-0">
+            <div className="flex bg-white rounded-lg shadow-sm min-w-max">
               <button
                 onClick={() => setViewMode('list')}
-                className={`flex items-center px-4 py-2 rounded-l-lg ${
+                className={`flex items-center px-3 sm:px-4 py-2 rounded-l-lg ${
                   viewMode === 'list' ? 'bg-black text-white' : 'text-gray-600 hover:bg-gray-50'
                 }`}
               >
-                <List className="w-5 h-5 mr-2" />
-                List
+                <List className="w-5 h-5 mr-1 sm:mr-2" />
+                <span className="text-sm sm:text-base">List</span>
               </button>
               <button
                 onClick={() => setViewMode('type')}
-                className={`flex items-center px-4 py-2 ${
+                className={`flex items-center px-3 sm:px-4 py-2 ${
                   viewMode === 'type' ? 'bg-black text-white' : 'text-gray-600 hover:bg-gray-50'
                 }`}
               >
-                <Grid2X2 className="w-5 h-5 mr-2" />
-                By Type
+                <Grid2X2 className="w-5 h-5 mr-1 sm:mr-2" />
+                <span className="text-sm sm:text-base">By Type</span>
               </button>
               <button
                 onClick={() => setViewMode('calendar')}
-                className={`flex items-center px-4 py-2 ${
+                className={`flex items-center px-3 sm:px-4 py-2 ${
                   viewMode === 'calendar' ? 'bg-black text-white' : 'text-gray-600 hover:bg-gray-50'
                 }`}
               >
-                <Calendar className="w-5 h-5 mr-2" />
-                Calendar
+                <Calendar className="w-5 h-5 mr-1 sm:mr-2" />
+                <span className="text-sm sm:text-base">Calendar</span>
               </button>
               <button
                 onClick={() => setViewMode('archive')}
-                className={`flex items-center px-4 py-2 rounded-r-lg ${
+                className={`flex items-center px-3 sm:px-4 py-2 rounded-r-lg ${
                   viewMode === 'archive' ? 'bg-black text-white' : 'text-gray-600 hover:bg-gray-50'
                 }`}
               >
-                <Archive className="w-5 h-5 mr-2" />
-                Archive
+                <Archive className="w-5 h-5 mr-1 sm:mr-2" />
+                <span className="text-sm sm:text-base">Archive</span>
               </button>
             </div>
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
             {viewMode !== 'archive' && viewMode === 'list' && (
               <>
                 <select
                   value={selectedType}
                   onChange={(e) => setSelectedType(e.target.value)}
-                  className="px-4 py-2 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-black"
+                  className="px-3 sm:px-4 py-2 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-black text-sm sm:text-base"
                 >
                   <option value="all">All Types</option>
                   <option value="Post">Posts</option>
@@ -410,7 +410,7 @@ export default function Dashboard() {
                   <select
                     value={selectedClient}
                     onChange={(e) => setSelectedClient(e.target.value)}
-                    className="px-4 py-2 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-black"
+                    className="px-3 sm:px-4 py-2 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-black text-sm sm:text-base"
                   >
                     <option value="all">All Clients</option>
                     {profiles.map((profile) => (
@@ -426,7 +426,7 @@ export default function Dashboard() {
             {viewMode !== 'archive' && isAdmin && (
               <button
                 onClick={() => setShowForm(true)}
-                className="flex items-center px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-900"
+                className="flex items-center justify-center px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-900 text-sm sm:text-base"
               >
                 <Plus className="w-5 h-5 mr-2" />
                 Add Content
@@ -435,10 +435,30 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {viewMode === 'list' && renderList()}
-        {viewMode === 'type' && renderByType()}
-        {viewMode === 'calendar' && renderCalendar()}
-        {viewMode === 'archive' && renderArchive()}
+        <div className="bg-white rounded-lg shadow-md overflow-hidden">
+          {viewMode === 'list' && (
+            <div className="overflow-x-auto">
+              {renderList()}
+            </div>
+          )}
+          {viewMode === 'type' && (
+            <div className="p-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                {renderByType()}
+              </div>
+            </div>
+          )}
+          {viewMode === 'calendar' && (
+            <div className="p-4">
+              {renderCalendar()}
+            </div>
+          )}
+          {viewMode === 'archive' && (
+            <div className="p-4">
+              {renderArchive()}
+            </div>
+          )}
+        </div>
 
         {showForm && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
