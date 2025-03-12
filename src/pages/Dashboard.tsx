@@ -162,10 +162,10 @@ export default function Dashboard() {
   };
 
   const renderContentItem = (item: ContentItem) => (
-    <div key={item.id} className="bg-white p-6 rounded-lg shadow-md space-y-4">
-      <div className="flex justify-between items-start">
+    <div key={item.id} className="bg-white p-4 sm:p-6 rounded-lg shadow-md space-y-4">
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
         <div className="space-y-2">
-          <span className="px-3 py-1 bg-black text-white rounded-full text-sm">
+          <span className="inline-block px-3 py-1 bg-black text-white rounded-full text-sm">
             {item.content_type}
           </span>
           {isAdmin && item.assigned_to_profile && (
@@ -175,7 +175,7 @@ export default function Dashboard() {
           )}
         </div>
         {viewMode !== 'archive' && item.status === 'Pending' && (
-          <div className="space-x-2">
+          <div className="flex sm:space-x-2">
             <button
               onClick={() => handleStatusUpdate(item.id, 'Approved')}
               className="p-2 hover:bg-green-50 rounded-full transition-colors"
@@ -191,8 +191,8 @@ export default function Dashboard() {
           </div>
         )}
       </div>
-      <p className="text-gray-700">{item.caption}</p>
-      <div className="flex items-center space-x-2 text-sm text-gray-500">
+      <p className="text-gray-700 break-words">{item.caption}</p>
+      <div className="flex flex-wrap items-center gap-2 text-sm text-gray-500">
         <a
           href={item.media_url}
           target="_blank"
@@ -202,7 +202,7 @@ export default function Dashboard() {
           <ExternalLink className="w-4 h-4 mr-1" />
           View Content
         </a>
-        <span>•</span>
+        <span className="hidden sm:inline">•</span>
         <span>{format(new Date(item.schedule_date), 'MMM d, yyyy')}</span>
       </div>
       <div className="flex flex-col space-y-2">
@@ -243,11 +243,11 @@ export default function Dashboard() {
     }
 
     return (
-      <div className="space-y-8">
+      <div className="space-y-8 p-4">
         {pendingItems.length > 0 && (
           <div>
             <h2 className="text-xl font-semibold mb-4">Pending Review</h2>
-            <div className="space-y-4">
+            <div className="grid gap-4">
               {pendingItems.map(renderContentItem)}
             </div>
           </div>
@@ -255,7 +255,7 @@ export default function Dashboard() {
         {otherItems.length > 0 && (
           <div>
             <h2 className="text-xl font-semibold mb-4">Other Content</h2>
-            <div className="space-y-4">
+            <div className="grid gap-4">
               {otherItems.map(renderContentItem)}
             </div>
           </div>
@@ -276,13 +276,15 @@ export default function Dashboard() {
     const types = ['Post', 'Story', 'Reel', 'TikTok'];
     
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 p-4">
         {types.map(type => (
           <div key={type} className="space-y-4">
             <h3 className="text-xl font-semibold">{type}s</h3>
-            {filteredItems
-              .filter(item => item.content_type === type)
-              .map(renderContentItem)}
+            <div className="grid gap-4">
+              {filteredItems
+                .filter(item => item.content_type === type)
+                .map(renderContentItem)}
+            </div>
           </div>
         ))}
       </div>
@@ -314,13 +316,13 @@ export default function Dashboard() {
     }
 
     return (
-      <div className="space-y-6">
+      <div className="space-y-6 p-4">
         {Object.entries(itemsByDate).map(([date, items]) => (
           <div key={date} className="space-y-4">
             <h3 className="text-xl font-semibold">
               {format(new Date(date), 'MMMM d, yyyy')}
             </h3>
-            <div className="space-y-4">
+            <div className="grid gap-4">
               {items.map(renderContentItem)}
             </div>
           </div>
@@ -358,7 +360,7 @@ export default function Dashboard() {
     }
 
     return (
-      <div className="space-y-12">
+      <div className="space-y-12 p-4">
         {Object.entries(itemsByYearAndMonth)
           .sort(([yearA], [yearB]) => Number(yearB) - Number(yearA))
           .map(([year, months]) => (
@@ -367,7 +369,7 @@ export default function Dashboard() {
               {Object.entries(months).map(([month, items]) => (
                 <div key={`${year}-${month}`} className="space-y-4">
                   <h3 className="text-xl font-semibold">{month}</h3>
-                  <div className="space-y-4">
+                  <div className="grid gap-4">
                     {items.map(renderContentItem)}
                   </div>
                 </div>
@@ -470,28 +472,10 @@ export default function Dashboard() {
         </div>
 
         <div className="bg-white rounded-lg shadow-md overflow-hidden">
-          {viewMode === 'list' && (
-            <div className="overflow-x-auto">
-              {renderList()}
-            </div>
-          )}
-          {viewMode === 'type' && (
-            <div className="p-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                {renderByType()}
-              </div>
-            </div>
-          )}
-          {viewMode === 'calendar' && (
-            <div className="p-4">
-              {renderCalendar()}
-            </div>
-          )}
-          {viewMode === 'archive' && (
-            <div className="p-4">
-              {renderArchive()}
-            </div>
-          )}
+          {viewMode === 'list' && renderList()}
+          {viewMode === 'type' && renderByType()}
+          {viewMode === 'calendar' && renderCalendar()}
+          {viewMode === 'archive' && renderArchive()}
         </div>
 
         {showForm && (
@@ -566,10 +550,11 @@ export default function Dashboard() {
                         type="date"
                         value={formData.schedule_date}
                         onChange={(e) => setFormData({ ...formData, schedule_date: e.target.value })}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black appearance-none"
+                        style={{ colorScheme: 'light' }}
                         required
                       />
-                      <CalendarIcon className="absolute right-3 top-2.5 w-5 h-5 text-gray-400" />
+                      <CalendarIcon className="absolute right-3 top-2.5 w-5 h-5 text-gray-400 pointer-events-none" />
                     </div>
                   </div>
                 </div>
