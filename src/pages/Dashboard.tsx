@@ -258,48 +258,48 @@ export default function Dashboard() {
         </div>
       );
     }
-
+  
     const types = ['Post', 'Story', 'Reel', 'TikTok'];
     
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 p-4">
         {types.map(type => (
-          <div key={type} className="min-w-0">
+          <div key={type} className="min-w-0 flex flex-col">
             <h3 className="text-xl font-semibold mb-4">{type}s</h3>
-            <div className="space-y-4">
+            <div className="space-y-4 flex-1">
               {filteredItems
                 .filter(item => item.content_type === type)
                 .map(item => (
-                  <div key={item.id} className="bg-white p-4 rounded-lg shadow-md space-y-4">
-                    <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-                      <div className="space-y-2">
+                  <div key={item.id} className="bg-white p-4 rounded-lg shadow-md space-y-3 break-words">
+                    <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2">
+                      <div className="space-y-2 min-w-0">
                         <span className="inline-block px-3 py-1 bg-black text-white rounded-full text-sm">
                           {item.content_type}
                         </span>
                         {isAdmin && item.assigned_to_profile && (
-                          <div className="text-sm text-gray-500">
+                          <div className="text-sm text-gray-500 truncate">
                             Assigned to: {item.assigned_to_profile.full_name || item.assigned_to_profile.email}
                           </div>
                         )}
                       </div>
                       {viewMode !== 'archive' && item.status === 'Pending' && (
-                        <div className="flex sm:space-x-2">
+                        <div className="flex shrink-0 gap-1">
                           <button
                             onClick={() => handleStatusUpdate(item.id, 'Approved')}
-                            className="p-2 hover:bg-green-50 rounded-full transition-colors"
+                            className="p-1.5 hover:bg-green-50 rounded-full transition-colors"
                           >
-                            <CheckCircle2 className="w-6 h-6 text-gray-400 hover:text-green-500" />
+                            <CheckCircle2 className="w-5 h-5 text-gray-400 hover:text-green-500" />
                           </button>
                           <button
                             onClick={() => handleStatusUpdate(item.id, 'Rejected')}
-                            className="p-2 hover:bg-red-50 rounded-full transition-colors"
+                            className="p-1.5 hover:bg-red-50 rounded-full transition-colors"
                           >
-                            <XCircle className="w-6 h-6 text-gray-400 hover:text-red-500" />
+                            <XCircle className="w-5 h-5 text-gray-400 hover:text-red-500" />
                           </button>
                         </div>
                       )}
                     </div>
-                    <p className="text-gray-700 break-words">{item.caption}</p>
+                    <p className="text-gray-700 text-sm line-clamp-3">{item.caption}</p>
                     <div className="flex flex-wrap items-center gap-2 text-sm text-gray-500">
                       <a
                         href={item.media_url}
@@ -322,13 +322,18 @@ export default function Dashboard() {
                         {item.status}
                       </div>
                       {item.status === 'Rejected' && item.rejection_notes && (
-                        <div className="text-sm text-gray-600 bg-gray-50 p-3 rounded-md">
+                        <div className="text-sm text-gray-600 bg-gray-50 p-2 rounded-md">
                           <strong>Rejection Notes:</strong> {item.rejection_notes}
                         </div>
                       )}
                     </div>
                   </div>
                 ))}
+              {filteredItems.filter(item => item.content_type === type).length === 0 && (
+                <div className="text-center py-4 text-gray-500 text-sm">
+                  No {type.toLowerCase()}s found
+                </div>
+              )}
             </div>
           </div>
         ))}
