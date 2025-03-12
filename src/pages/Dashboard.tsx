@@ -264,12 +264,71 @@ export default function Dashboard() {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 p-4">
         {types.map(type => (
-          <div key={type} className="space-y-4">
-            <h3 className="text-xl font-semibold">{type}s</h3>
-            <div className="grid gap-4">
+          <div key={type} className="min-w-0">
+            <h3 className="text-xl font-semibold mb-4">{type}s</h3>
+            <div className="space-y-4">
               {filteredItems
                 .filter(item => item.content_type === type)
-                .map(renderContentItem)}
+                .map(item => (
+                  <div key={item.id} className="bg-white p-4 rounded-lg shadow-md space-y-4">
+                    <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+                      <div className="space-y-2">
+                        <span className="inline-block px-3 py-1 bg-black text-white rounded-full text-sm">
+                          {item.content_type}
+                        </span>
+                        {isAdmin && item.assigned_to_profile && (
+                          <div className="text-sm text-gray-500">
+                            Assigned to: {item.assigned_to_profile.full_name || item.assigned_to_profile.email}
+                          </div>
+                        )}
+                      </div>
+                      {viewMode !== 'archive' && item.status === 'Pending' && (
+                        <div className="flex sm:space-x-2">
+                          <button
+                            onClick={() => handleStatusUpdate(item.id, 'Approved')}
+                            className="p-2 hover:bg-green-50 rounded-full transition-colors"
+                          >
+                            <CheckCircle2 className="w-6 h-6 text-gray-400 hover:text-green-500" />
+                          </button>
+                          <button
+                            onClick={() => handleStatusUpdate(item.id, 'Rejected')}
+                            className="p-2 hover:bg-red-50 rounded-full transition-colors"
+                          >
+                            <XCircle className="w-6 h-6 text-gray-400 hover:text-red-500" />
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                    <p className="text-gray-700 break-words">{item.caption}</p>
+                    <div className="flex flex-wrap items-center gap-2 text-sm text-gray-500">
+                      <a
+                        href={item.media_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center hover:text-black"
+                      >
+                        <ExternalLink className="w-4 h-4 mr-1" />
+                        View Content
+                      </a>
+                      <span className="hidden sm:inline">•</span>
+                      <span>{format(new Date(item.schedule_date), 'MMM d, yyyy')}</span>
+                    </div>
+                    <div className="flex flex-col space-y-2">
+                      <div className={`text-sm font-medium ${
+                        item.status === 'Approved' ? 'text-green-500' :
+                        item.status === 'Rejected' ? 'text-red-500' :
+                        'text-yellow-500'
+                      }`}>
+                        {item.status}
+                      </div>
+                      {item.status === 'Rejected' && item.rejection_notes && (
+                        <div className="text-sm text-gray-600 bg-gray-50 p-3 rounded-md">
+                          <strong>Rejection Notes:</strong> {item.rejection_notes}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
             </div>
           </div>
         ))}
@@ -551,8 +610,14 @@ export default function Dashboard() {
                         type="date"
                         value={formData.schedule_date}
                         onChange={(e) => setFormData({ ...formData, schedule_date: e.target.value })}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black appearance-none"
-                        style={{ colorScheme: 'light' }}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
+                        style={{
+                          colorScheme: 'light',
+                          '::-webkit-calendar-picker-indicator': {
+                            cursor: 'pointer',
+                            filter: 'invert(0.5)',
+                          },
+                        }}
                         required
                       />
                       <CalendarIcon className="absolute right-3 top-2.5 w-5 h-5 text-gray-400 pointer-events-none" />
