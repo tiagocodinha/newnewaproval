@@ -25,6 +25,7 @@ type ContentItem = {
 export default function Dashboard() {
   const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [selectedType, setSelectedType] = useState<string>('all');
+  const [selectedStatus, setSelectedStatus] = useState<string>('all');
   const [selectedClient, setSelectedClient] = useState<string>('all');
   const [showForm, setShowForm] = useState(false);
   const [rejectionNotes, setRejectionNotes] = useState<string>('');
@@ -95,8 +96,9 @@ export default function Dashboard() {
     
     const isCurrentContent = !isBefore(startOfDay(parseISO(item.schedule_date)), today);
     const matchesType = selectedType === 'all' || item.content_type === selectedType;
+    const matchesStatus = selectedStatus === 'all' || item.status === selectedStatus;
     const matchesClient = selectedClient === 'all' || item.assigned_to_profile?.email === selectedClient;
-    return isCurrentContent && matchesType && matchesClient;
+    return isCurrentContent && matchesType && matchesStatus && matchesClient;
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -162,7 +164,7 @@ export default function Dashboard() {
   };
 
   const renderContentItem = (item: ContentItem) => (
-    <div key={item.id} className="bg-white p-4 sm:p-6 rounded-lg shadow-md space-y-4">
+    <div key={item.id} className="bg-white p-4 sm:p-6 rounded-lg shadow-md space-y-4 w-full">
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
         <div className="space-y-2">
           <span className="inline-block px-3 py-1 bg-black text-white rounded-full text-sm">
@@ -231,9 +233,6 @@ export default function Dashboard() {
       );
     }
 
-    const pendingItems = filteredItems.filter(item => item.status === 'Pending');
-    const otherItems = filteredItems.filter(item => item.status !== 'Pending');
-
     if (filteredItems.length === 0) {
       return (
         <div className="text-center py-12">
@@ -243,23 +242,10 @@ export default function Dashboard() {
     }
 
     return (
-      <div className="space-y-8 p-4">
-        {pendingItems.length > 0 && (
-          <div>
-            <h2 className="text-xl font-semibold mb-4">Pending Review</h2>
-            <div className="grid gap-4">
-              {pendingItems.map(renderContentItem)}
-            </div>
-          </div>
-        )}
-        {otherItems.length > 0 && (
-          <div>
-            <h2 className="text-xl font-semibold mb-4">Other Content</h2>
-            <div className="grid gap-4">
-              {otherItems.map(renderContentItem)}
-            </div>
-          </div>
-        )}
+      <div className="p-4 space-y-8">
+        <div className="grid grid-cols-1 gap-6">
+          {filteredItems.map(renderContentItem)}
+        </div>
       </div>
     );
   };
@@ -430,39 +416,54 @@ export default function Dashboard() {
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
             {viewMode !== 'archive' && viewMode === 'list' && (
               <>
-                <select
-                  value={selectedType}
-                  onChange={(e) => setSelectedType(e.target.value)}
-                  className="px-3 sm:px-4 py-2 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-black text-sm sm:text-base"
-                >
-                  <option value="all">All Types</option>
-                  <option value="Post">Posts</option>
-                  <option value="Story">Stories</option>
-                  <option value="Reel">Reels</option>
-                  <option value="TikTok">TikTok</option>
-                </select>
-
-                {isAdmin && (
+                <div className="flex flex-col sm:flex-row gap-4">
                   <select
-                    value={selectedClient}
-                    onChange={(e) => setSelectedClient(e.target.value)}
+                    value={selectedType}
+                    onChange={(e) => setSelectedType(e.target.value)}
                     className="px-3 sm:px-4 py-2 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-black text-sm sm:text-base"
                   >
-                    <option value="all">All Clients</option>
-                    {profiles.map((profile) => (
-                      <option key={profile.id} value={profile.email}>
-                        {profile.full_name || profile.email}
-                      </option>
-                    ))}
+                    <option value="all">All Types</option>
+                    <option value="Post">Posts</option>
+                    <option value="Story">Stories</option>
+                    <option value="Reel">Reels</option>
+                    <option value="TikTok">TikTok</option>
                   </select>
-                )}
+
+                  {isAdmin && (
+                    <>
+                      <select
+                        value={selectedStatus}
+                        onChange={(e) => setSelectedStatus(e.target.value)}
+                        className="px-3 sm:px-4 py-2 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-black text-sm sm:text-base"
+                      >
+                        <option value="all">All Status</option>
+                        <option value="Approved">Approved</option>
+                        <option value="Rejected">Rejected</option>
+                        <option value="Pending">Pending</option>
+                      </select>
+
+                      <select
+                        value={selectedClient}
+                        onChange={(e) => setSelectedClient(e.target.value)}
+                        className="px-3 sm:px-4 py-2 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-black text-sm sm:text-base"
+                      >
+                        <option value="all">All Clients</option>
+                        {profiles.map((profile) => (
+                          <option key={profile.id} value={profile.email}>
+                            {profile.full_name || profile.email}
+                          </option>
+                        ))}
+                      </select>
+                    </>
+                  )}
+                </div>
               </>
             )}
 
             {viewMode !== 'archive' && isAdmin && (
               <button
                 onClick={() => setShowForm(true)}
-                className="flex items-center justify-center px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-900 text-sm sm:text-base"
+                className="flex items-center justify-center px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-900 text-sm sm:text-base whitespace-nowrap"
               >
                 <Plus className="w-5 h-5 mr-2" />
                 Add Content
