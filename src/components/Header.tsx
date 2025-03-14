@@ -7,13 +7,24 @@ export default function Header({ isAdmin = false }: { isAdmin?: boolean }) {
 
   return (
     <div className="space-y-4 sm:space-y-6">
-      <div className="flex justify-center">
+      <div className="flex justify-center space-x-4 items-center">
+        {/* Logo da Stagelink */}
         <img 
           src="https://lrytvlsyuvctghzqsjic.supabase.co/storage/v1/object/public/logo//Stagelink-logotipo-black.png" 
           alt="Stagelink Logo" 
           className="h-16 sm:h-20 object-contain"
         />
+
+        {/* Logo da Empresa do Usuário */}
+        {profile?.company_logo && (
+          <img 
+            src={profile.company_logo} 
+            alt="Company Logo" 
+            className="h-12 sm:h-16 object-contain"
+          />
+        )}
       </div>
+
       <div className="flex flex-col sm:flex-row justify-between items-center gap-4 sm:gap-0">
         <div className="text-center sm:text-left">
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
