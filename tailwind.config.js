@@ -12,7 +12,7 @@ export default {
 };
 
 module.exports = {
-  darkMode: 'class', // ou 'media' se quiser ativar automaticamente pelo sistema
+  darkMode: 'media', // ou 'media' se quiser ativar automaticamente pelo sistema
   theme: {
     extend: {},
   },
