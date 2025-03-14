@@ -15,6 +15,11 @@ export default function Header({ isAdmin = false }: { isAdmin?: boolean }) {
           className="h-16 sm:h-20 object-contain"
         />
 
+        {/* Barra vertical entre os logos */}
+        {profile?.company_logo && (
+          <div className="w-px h-12 sm:h-16 bg-gray-400"></div>
+        )}
+
         {/* Logo da Empresa do Usuário */}
         {profile?.company_logo && (
           <img 
