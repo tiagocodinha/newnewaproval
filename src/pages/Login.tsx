@@ -26,13 +26,13 @@ export default function Login() {
         <img 
           src="https://lrytvlsyuvctghzqsjic.supabase.co/storage/v1/object/public/logo//Stagelink-logotipo-black.png" 
           alt="Stagelink Logo" 
-          className="h-20 sm:h-28 mx-auto object-contain mb-4 sm:mb-6 dark:hidden"
+          className="h-20 sm:h-28 mx-auto object-contain mb-4 sm:mb-6 hidden dark:block"
         />
         {/* Logo para modo escuro */}
         <img 
           src="https://lrytvlsyuvctghzqsjic.supabase.co/storage/v1/object/public/logo//Stagelink-logotipo-white.png" 
           alt="Stagelink Logo Dark" 
-          className="h-20 sm:h-28 mx-auto object-contain mb-4 sm:mb-6 hidden dark:block"
+          className="h-20 sm:h-28 mx-auto object-contain mb-4 sm:mb-6 dark:hidden"
         />
           <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">
             Sign in to your account
