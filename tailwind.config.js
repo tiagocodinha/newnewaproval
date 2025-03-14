@@ -10,3 +10,11 @@ export default {
   },
   plugins: [],
 };
+
+module.exports = {
+  darkMode: 'class', // ou 'media' se quiser ativar automaticamente pelo sistema
+  theme: {
+    extend: {},
+  },
+  plugins: [],
+};
