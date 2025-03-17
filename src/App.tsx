@@ -10,24 +10,22 @@ const queryClient = new QueryClient();
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { session } = useAuth();
-  if (!session) return <Navigate to="/login" />;
+  if (!session) return <Navigate to="/" />;
   return <>{children}</>;
 }
 
 function App() {
+  const { session } = useAuth();
+
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <BrowserRouter>
           <Routes>
-            <Route path="/login" element={<Login />} />
+            <Route path="/login" element={<Navigate to="/" replace />} />
             <Route
               path="/"
-              element={
-                <ProtectedRoute>
-                  <Dashboard />
-                </ProtectedRoute>
-              }
+              element={session ? <Dashboard /> : <Login />}
             />
             <Route
               path="/admin"
