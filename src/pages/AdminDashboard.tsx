@@ -20,7 +20,7 @@ export default function AdminDashboard() {
     content_type: 'Post',
     media_url: '',
     schedule_date: format(new Date(), 'yyyy-MM-dd'),
-    assigned_to: '',
+    assignees: [] as string[],
   });
 
   const { data: profiles = [] } = useQuery({
@@ -39,42 +39,63 @@ export default function AdminDashboard() {
   const { data: contentItems = [], refetch } = useQuery({
     queryKey: ['all-content-items'],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data: items, error: itemsError } = await supabase
         .from('content_items')
         .select(`
           *,
-          assigned_to_profile:profiles!content_items_assigned_to_fkey(email, full_name)
+          content_item_assignees(
+            profile:profiles(email, full_name)
+          )
         `)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
-      return data;
+      if (itemsError) throw itemsError;
+      return items;
     },
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.assigned_to) {
-      alert('Please select a user to assign the content to');
+    if (formData.assignees.length === 0) {
+      alert('Please select at least one user to assign the content to');
       return;
     }
 
-    const { error } = await supabase.from('content_items').insert({
-      ...formData,
-      created_by: profile?.id,
-      status: 'Pending' // Always set to Pending when creating
-    });
+    const { data: contentItem, error: contentError } = await supabase
+      .from('content_items')
+      .insert({
+        caption: formData.caption,
+        content_type: formData.content_type,
+        media_url: formData.media_url,
+        schedule_date: formData.schedule_date,
+        created_by: profile?.id,
+        status: 'Pending'
+      })
+      .select()
+      .single();
 
-    if (!error) {
-      setShowForm(false);
-      setFormData({
-        caption: '',
-        content_type: 'Post',
-        media_url: '',
-        schedule_date: format(new Date(), 'yyyy-MM-dd'),
-        assigned_to: '',
-      });
-      refetch();
+    if (!contentError && contentItem) {
+      // Insert assignments
+      const assignments = formData.assignees.map(assigneeId => ({
+        content_item_id: contentItem.id,
+        profile_id: assigneeId
+      }));
+
+      const { error: assignError } = await supabase
+        .from('content_item_assignees')
+        .insert(assignments);
+
+      if (!assignError) {
+        setShowForm(false);
+        setFormData({
+          caption: '',
+          content_type: 'Post',
+          media_url: '',
+          schedule_date: format(new Date(), 'yyyy-MM-dd'),
+          assignees: [],
+        });
+        refetch();
+      }
     }
   };
 
@@ -121,21 +142,28 @@ export default function AdminDashboard() {
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Assign To
+                    Assign To (Multiple)
                   </label>
                   <select
-                    value={formData.assigned_to}
-                    onChange={(e) => setFormData({ ...formData, assigned_to: e.target.value })}
+                    multiple
+                    value={formData.assignees}
+                    onChange={(e) => {
+                      const selectedOptions = Array.from(e.target.selectedOptions, option => option.value);
+                      setFormData({ ...formData, assignees: selectedOptions });
+                    }}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
                     required
+                    size={4}
                   >
-                    <option value="">Select a user</option>
                     {profiles.map((profile) => (
                       <option key={profile.id} value={profile.id}>
                         {profile.full_name || profile.email}
                       </option>
                     ))}
                   </select>
+                  <p className="mt-1 text-sm text-gray-500">
+                    Hold Ctrl/Cmd to select multiple users
+                  </p>
                 </div>
 
                 <div>
@@ -263,7 +291,13 @@ export default function AdminDashboard() {
                       </a>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {item.assigned_to_profile.full_name || item.assigned_to_profile.email}
+                      <div className="space-y-1">
+                        {item.content_item_assignees.map((assignee: any) => (
+                          <div key={assignee.profile.email}>
+                            {assignee.profile.full_name || assignee.profile.email}
+                          </div>
+                        ))}
+                      </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {format(new Date(item.schedule_date), 'MMM d, yyyy')}
