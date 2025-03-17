@@ -14,31 +14,37 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
-function App() {
+function AppRoutes() {
   const { session } = useAuth();
-
+  
   return (
-    <QueryClientProvider client={queryClient}>
-      <AuthProvider>
+    <Routes>
+      <Route path="/login" element={<Navigate to="/" replace />} />
+      <Route
+        path="/"
+        element={session ? <Dashboard /> : <Login />}
+      />
+      <Route
+        path="/admin"
+        element={
+          <ProtectedRoute>
+            <AdminDashboard />
+          </ProtectedRoute>
+        }
+      />
+    </Routes>
+  );
+}
+
+function App() {
+  return (
+    <AuthProvider>
+      <QueryClientProvider client={queryClient}>
         <BrowserRouter>
-          <Routes>
-            <Route path="/login" element={<Navigate to="/" replace />} />
-            <Route
-              path="/"
-              element={session ? <Dashboard /> : <Login />}
-            />
-            <Route
-              path="/admin"
-              element={
-                <ProtectedRoute>
-                  <AdminDashboard />
-                </ProtectedRoute>
-              }
-            />
-          </Routes>
+          <AppRoutes />
         </BrowserRouter>
-      </AuthProvider>
-    </QueryClientProvider>
+      </QueryClientProvider>
+    </AuthProvider>
   );
 }
 
