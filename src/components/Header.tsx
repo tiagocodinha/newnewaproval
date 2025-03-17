@@ -11,13 +11,13 @@ export default function Header({ isAdmin = false }: { isAdmin?: boolean }) {
         {/* Logo da Stagelink */}
             <img 
                 src="https://lrytvlsyuvctghzqsjic.supabase.co/storage/v1/object/public/logo//Stagelink-logotipo-black.png" 
-                alt="Stagelink Logo" 
+                alt="Stagelink Logo Dark" 
                 className="h-12 sm:h-16 object-contain hidden dark:block"
               />
               {/* Logo para modo escuro */}
               <img 
                 src="https://lrytvlsyuvctghzqsjic.supabase.co/storage/v1/object/public/logo//Stagelink-logotipo-white.png" 
-                alt="Stagelink Logo Dark" 
+                alt="Stagelink Logo" 
                 className="h-12 sm:h-16 object-contain dark:hidden"
               />
 
