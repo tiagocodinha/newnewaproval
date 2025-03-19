@@ -5,9 +5,8 @@ import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
 import { Calendar, List, Grid2X2, CheckCircle2, XCircle, ExternalLink, Loader2, Plus, X, CalendarIcon, Archive } from 'lucide-react';
 import Header from '../components/Header';
-import CalendarArchive from '../components/CalendarArchive';
 
-type ViewMode = 'list' | 'type' | 'calendar' | 'archive' | 'calendar-archive';
+type ViewMode = 'list' | 'type' | 'calendar' | 'archive';
 type ContentItem = {
   id: string;
   caption: string;
@@ -467,15 +466,6 @@ export default function Dashboard() {
                 <span className="text-sm sm:text-base">Calendar</span>
               </button>
               <button
-                onClick={() => setViewMode('calendar-archive')}
-                className={`flex items-center px-3 sm:px-4 py-2 ${
-                  viewMode === 'calendar-archive' ? 'bg-black text-white' : 'text-gray-600 hover:bg-gray-50'
-                }`}
-              >
-                <Calendar className="w-5 h-5 mr-1 sm:mr-2" />
-                <span className="text-sm sm:text-base">Calendar Archive</span>
-              </button>
-              <button
                 onClick={() => setViewMode('archive')}
                 className={`flex items-center px-3 sm:px-4 py-2 rounded-r-lg ${
                   viewMode === 'archive' ? 'bg-black text-white' : 'text-gray-600 hover:bg-gray-50'
@@ -550,7 +540,6 @@ export default function Dashboard() {
           {viewMode === 'list' && renderList()}
           {viewMode === 'type' && renderByType()}
           {viewMode === 'calendar' && renderCalendar()}
-          {viewMode === 'calendar-archive' && <CalendarArchive items={contentItems} />}
           {viewMode === 'archive' && renderArchive()}
         </div>
 
