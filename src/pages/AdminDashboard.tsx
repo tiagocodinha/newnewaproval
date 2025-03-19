@@ -145,9 +145,10 @@ export default function AdminDashboard() {
                   <textarea
                     value={formData.caption}
                     onChange={(e) => setFormData({ ...formData, caption: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black font-mono"
                     required
                     rows={4}
+                    style={{ whiteSpace: 'pre-wrap' }}
                   />
                 </div>
 
@@ -249,7 +250,7 @@ export default function AdminDashboard() {
                       </span>
                     </td>
                     <td className="px-6 py-4">
-                      <div className="text-sm text-gray-900 line-clamp-2">
+                      <div className="text-sm text-gray-900 whitespace-pre-wrap">
                         {item.caption}
                       </div>
                       <a
