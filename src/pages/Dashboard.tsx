@@ -115,7 +115,17 @@ export default function Dashboard() {
     if (viewMode === 'archive') {
       return isBefore(startOfDay(parseISO(item.schedule_date)), today);
     }
+
+    // For list view, only show Pending and Rejected items
+    if (viewMode === 'list') {
+      const isCurrentContent = !isBefore(startOfDay(parseISO(item.schedule_date)), today);
+      const isPendingOrRejected = item.status === 'Pending' || item.status === 'Rejected';
+      const matchesType = selectedType === 'all' || item.content_type === selectedType;
+      const matchesClient = selectedClient === 'all' || item.assigned_to_profile?.email === selectedClient;
+      return isCurrentContent && isPendingOrRejected && matchesType && matchesClient;
+    }
     
+    // For type view, show all current content
     const isCurrentContent = !isBefore(startOfDay(parseISO(item.schedule_date)), today);
     const matchesType = selectedType === 'all' || item.content_type === selectedType;
     const matchesStatus = selectedStatus === 'all' || item.status === selectedStatus;
@@ -262,7 +272,7 @@ export default function Dashboard() {
     if (filteredItems.length === 0) {
       return (
         <div className="text-center py-12">
-          <p className="text-gray-500">No content items found</p>
+          <p className="text-gray-500">No pending or rejected content items found</p>
         </div>
       );
     }
@@ -606,17 +616,6 @@ export default function Dashboard() {
 
                   {isAdmin && (
                     <>
-                      <select
-                        value={selectedStatus}
-                        onChange={(e) => setSelectedStatus(e.target.value)}
-                        className="px-3 sm:px-4 py-2 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-black text-sm sm:text-base"
-                      >
-                        <option value="all">All Status</option>
-                        <option value="Approved">Approved</option>
-                        <option value="Rejected">Rejected</option>
-                        <option value="Pending">Pending</option>
-                      </select>
-
                       <select
                         value={selectedClient}
                         onChange={(e) => setSelectedClient(e.target.value)}
