@@ -23,7 +23,7 @@ type ContentItem = {
   };
 };
 
-function Dashboard() {
+export default function Dashboard() {
   const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedType, setSelectedType] = useState<string>('all');
@@ -78,7 +78,10 @@ function Dashboard() {
       
       const query = supabase
         .from('content_items')
-        .select('*, assigned_to_profile:profiles!content_items_assigned_to_fkey(email, full_name)')
+        .select(`
+          *,
+          assigned_to_profile:profiles!content_items_assigned_to_fkey(email, full_name)
+        `)
         .order('schedule_date', { ascending: true });
 
       if (!isAdmin) {
@@ -374,190 +377,6 @@ function Dashboard() {
     );
   };
 
-  const renderCalendarDay = (day: Date, dayContent: ContentItem[]) => {
-    const isCurrentMonth = isSameMonth(day, currentDate);
-    const isCurrentDay = isToday(day);
-
-    return (
-      <div
-        key={day.toString()}
-        className={`relative min-h-[120px] sm:min-h-[200px] ${
-          isCurrentMonth ? 'bg-white' : 'bg-gray-50'
-        } ${isCurrentDay ? 'ring-2 ring-black ring-inset' : ''}`}
-      >
-        <div className="sticky top-0 bg-inherit p-2 z-10 border-b">
-          <div className="flex justify-between items-center">
-            <span
-              className={`text-sm font-medium ${
-                isCurrentMonth ? 'text-gray-900' : 'text-gray-400'
-              }`}
-            >
-              {format(day, 'd')}
-            </span>
-            {dayContent.length > 0 && (
-              <span className="text-xs font-medium bg-gray-100 px-2 py-0.5 rounded-full">
-                {dayContent.length}
-              </span>
-            )}
-          </div>
-        </div>
-        {dayContent.length > 0 && (
-          <div className="p-1 space-y-1 max-h-[calc(100%-2.5rem)] overflow-y-auto">
-            {dayContent.map(content => (
-              <div
-                key={content.id}
-                className="bg-white border rounded p-1.5 shadow-sm hover:shadow transition-shadow text-xs"
-              >
-                <div className="flex items-start gap-1.5">
-                  <div className={`w-2 h-2 mt-1 rounded-full flex-shrink-0 ${
-                    content.status === 'Approved' ? 'bg-green-500' :
-                    content.status === 'Rejected' ? 'bg-red-500' :
-                    'bg-yellow-500'
-                  }`} />
-                  <div className="min-w-0 flex-1">
-                    <div className="flex flex-wrap gap-1 mb-1">
-                      <span className="px-1.5 py-0.5 bg-gray-100 text-gray-800 rounded-full text-xs">
-                        {content.content_type}
-                      </span>
-                      <span className={`px-1.5 py-0.5 rounded-full text-xs ${
-                        content.status === 'Approved' ? 'bg-green-100 text-green-800' :
-                        content.status === 'Rejected' ? 'bg-red-100 text-red-800' :
-                        'bg-yellow-100 text-yellow-800'
-                      }`}>
-                        {content.status}
-                      </span>
-                    </div>
-                    <div className="font-medium line-clamp-2">
-                      {content.title || 'Untitled'}
-                    </div>
-                    {isAdmin && content.assigned_to_profile && (
-                      <div className="text-gray-500 line-clamp-1 mt-0.5">
-                        {content.assigned_to_profile.full_name || content.assigned_to_profile.email}
-                      </div>
-                    )}
-                    <a
-                      href={content.media_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center text-gray-600 hover:text-black mt-1"
-                      onClick={e => e.stopPropagation()}
-                    >
-                      <ExternalLink className="w-3 h-3 mr-0.5" />
-                      <span>View</span>
-                    </a>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-    );
-  };
-
-  const renderCalendarMobile = () => {
-    if (isLoadingContent) {
-      return (
-        <div className="flex items-center justify-center py-12">
-          <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
-        </div>
-      );
-    }
-
-    const monthStart = startOfMonth(currentDate);
-    const monthEnd = endOfMonth(currentDate);
-    const days = eachDayOfInterval({ start: monthStart, end: monthEnd });
-
-    return (
-      <div className="space-y-4 p-4">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-bold">
-            {format(currentDate, 'MMMM yyyy')}
-          </h2>
-          <div className="flex gap-2">
-            <button
-              onClick={previousMonth}
-              className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-            >
-              <ChevronLeft className="w-5 h-5" />
-            </button>
-            <button
-              onClick={nextMonth}
-              className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-            >
-              <ChevronRight className="w-5 h-5" />
-            </button>
-          </div>
-        </div>
-
-        <div className="space-y-4">
-          {days.map(day => {
-            const dayContent = filteredItems.filter(item => {
-              const itemDate = parseISO(item.schedule_date);
-              return format(itemDate, 'yyyy-MM-dd') === format(day, 'yyyy-MM-dd');
-            });
-
-            if (dayContent.length === 0) return null;
-
-            return (
-              <div key={day.toString()} className="bg-white rounded-lg shadow-sm p-4">
-                <div className="flex items-center justify-between mb-3">
-                  <h3 className="text-lg font-semibold">
-                    {format(day, 'EEEE, MMMM d')}
-                  </h3>
-                  <span className="text-sm font-medium bg-gray-100 px-2 py-0.5 rounded-full">
-                    {dayContent.length} items
-                  </span>
-                </div>
-                <div className="space-y-3">
-                  {dayContent.map(content => (
-                    <div
-                      key={content.id}
-                      className="border rounded-lg p-3 space-y-2"
-                    >
-                      <div className="flex items-center gap-2">
-                        <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${
-                          content.status === 'Approved' ? 'bg-green-100 text-green-800' :
-                          content.status === 'Rejected' ? 'bg-red-100 text-red-800' :
-                          'bg-yellow-100 text-yellow-800'
-                        }`}>
-                          {content.status}
-                        </span>
-                        <span className="px-2 py-0.5 text-xs font-medium bg-gray-100 rounded-full">
-                          {content.content_type}
-                        </span>
-                      </div>
-                      <div className="font-medium">
-                        {content.title || 'Untitled'}
-                      </div>
-                      {isAdmin && content.assigned_to_profile && (
-                        <div className="text-sm text-gray-500">
-                          {content.assigned_to_profile.full_name || content.assigned_to_profile.email}
-                        </div>
-                      )}
-                      <div className="text-sm text-gray-600 line-clamp-2">
-                        {content.caption}
-                      </div>
-                      <a
-                        href={content.media_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center text-gray-600 hover:text-black text-sm"
-                      >
-                        <ExternalLink className="w-4 h-4 mr-1" />
-                        View Content
-                      </a>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    );
-  };
-
   const renderCalendar = () => {
     if (isLoadingContent) {
       return (
@@ -567,15 +386,12 @@ function Dashboard() {
       );
     }
 
-    // Show list view on mobile
-    if (window.innerWidth < 640) {
-      return renderCalendarMobile();
-    }
-
     const monthStart = startOfMonth(currentDate);
     const monthEnd = endOfMonth(currentDate);
-    const calendarStart = startOfWeek(monthStart, { weekStartsOn: 1 }); // Start week on Monday
-    const calendarEnd = endOfWeek(monthEnd, { weekStartsOn: 1 }); // End week on Sunday
+    
+    const calendarStart = startOfWeek(monthStart, { weekStartsOn: 1 });
+    const calendarEnd = endOfWeek(monthEnd, { weekStartsOn: 1 });
+    
     const calendarDays = eachDayOfInterval({ start: calendarStart, end: calendarEnd });
 
     return (
@@ -610,13 +426,81 @@ function Dashboard() {
             </div>
           ))}
 
-          {calendarDays.map(day => {
-            const dayContent = filteredItems.filter(item => {
+          {calendarDays.map((day) => {
+            const dayContent = contentItems.filter(item => {
               const itemDate = parseISO(item.schedule_date);
               return format(itemDate, 'yyyy-MM-dd') === format(day, 'yyyy-MM-dd');
             });
+            const isCurrentMonth = isSameMonth(day, currentDate);
+            const isCurrentDay = isToday(day);
 
-            return renderCalendarDay(day, dayContent);
+            return (
+              <div
+                key={day.toString()}
+                className={`relative min-h-[200px] ${
+                  isCurrentMonth ? 'bg-white' : 'bg-gray-50'
+                } ${isCurrentDay ? 'ring-2 ring-black ring-inset' : ''}`}
+              >
+                <div className="sticky top-0 bg-inherit p-2 z-10 border-b">
+                  <div className="flex justify-between items-center">
+                    <span
+                      className={`text-sm font-medium ${
+                        isCurrentMonth ? 'text-gray-900' : 'text-gray-400'
+                      }`}
+                    >
+                      {format(day, 'd')}
+                    </span>
+                    {dayContent.length > 0 && (
+                      <span className="text-xs font-medium bg-gray-100 px-2 py-0.5 rounded-full">
+                        {dayContent.length}
+                      </span>
+                    )}
+                  </div>
+                </div>
+                {dayContent.length > 0 && (
+                  <div className="p-2 space-y-2 max-h-[300px] overflow-y-auto">
+                    {dayContent.map(content => (
+                      <div
+                        key={content.id}
+                        className="bg-white border rounded-md p-2 shadow-sm hover:shadow-md transition-shadow"
+                      >
+                        <div className="space-y-1.5">
+                          <div className="flex items-start justify-between gap-2">
+                            <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${
+                              content.status === 'Approved' ? 'bg-green-100 text-green-800' :
+                              content.status === 'Rejected' ? 'bg-red-100 text-red-800' :
+                              'bg-yellow-100 text-yellow-800'
+                            }`}>
+                              {content.status}
+                            </span>
+                            <span className="px-2 py-0.5 text-xs font-medium bg-gray-100 text-gray-800 rounded-full">
+                              {content.content_type}
+                            </span>
+                          </div>
+                          <h4 className="text-sm font-medium text-gray-900 line-clamp-2">
+                            {content.title || 'Untitled'}
+                          </h4>
+                          {isAdmin && content.assigned_to_profile && (
+                            <div className="text-xs text-gray-500">
+                              {content.assigned_to_profile.full_name || content.assigned_to_profile.email}
+                            </div>
+                          )}
+                          <a
+                            href={content.media_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center text-xs text-gray-600 hover:text-black"
+                          >
+                            <ExternalLink className="w-3 h-3 mr-1" />
+                            View Content
+                          </a>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            );
           })}
         </div>
       </div>
@@ -966,5 +850,3 @@ function Dashboard() {
     </div>
   );
 }
-
-export default Dashboard;
