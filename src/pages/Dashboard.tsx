@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isToday, parseISO, isBefore, startOfDay, addDays, startOfWeek, endOfWeek } from 'date-fns';
+import { format, isBefore, startOfDay, parseISO, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isToday } from 'date-fns';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
 import { Calendar, List, Grid2X2, CheckCircle2, XCircle, ExternalLink, Loader2, Plus, X, CalendarIcon, Archive, ChevronLeft, ChevronRight } from 'lucide-react';
@@ -107,6 +107,7 @@ export default function Dashboard() {
   }, { currentContent: [] as ContentItem[], archivedContent: [] as ContentItem[] });
 
   const filteredItems = contentItems.filter(item => {
+    // Show all content in calendar view
     if (viewMode === 'calendar') {
       return true;
     }
@@ -115,6 +116,7 @@ export default function Dashboard() {
       return isBefore(startOfDay(parseISO(item.schedule_date)), today);
     }
 
+    // For list view, only show Pending and Rejected items
     if (viewMode === 'list') {
       const isCurrentContent = !isBefore(startOfDay(parseISO(item.schedule_date)), today);
       const isPendingOrRejected = item.status === 'Pending' || item.status === 'Rejected';
@@ -123,6 +125,7 @@ export default function Dashboard() {
       return isCurrentContent && isPendingOrRejected && matchesType && matchesClient;
     }
     
+    // For type view, show all current content
     const isCurrentContent = !isBefore(startOfDay(parseISO(item.schedule_date)), today);
     const matchesType = selectedType === 'all' || item.content_type === selectedType;
     const matchesStatus = selectedStatus === 'all' || item.status === selectedStatus;
@@ -386,14 +389,6 @@ export default function Dashboard() {
       );
     }
 
-    const monthStart = startOfMonth(currentDate);
-    const monthEnd = endOfMonth(currentDate);
-    
-    const calendarStart = startOfWeek(monthStart, { weekStartsOn: 1 });
-    const calendarEnd = endOfWeek(monthEnd, { weekStartsOn: 1 });
-    
-    const calendarDays = eachDayOfInterval({ start: calendarStart, end: calendarEnd });
-
     return (
       <div className="p-4">
         <div className="flex items-center justify-between mb-8">
@@ -417,7 +412,7 @@ export default function Dashboard() {
         </div>
 
         <div className="grid grid-cols-7 gap-px bg-gray-200 rounded-lg overflow-hidden">
-          {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(day => (
+          {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
             <div
               key={day}
               className="bg-gray-50 p-4 text-center text-sm font-semibold"
@@ -426,8 +421,8 @@ export default function Dashboard() {
             </div>
           ))}
 
-          {calendarDays.map((day) => {
-            const dayContent = contentItems.filter(item => {
+          {daysInMonth.map((day) => {
+            const dayContent = filteredItems.filter(item => {
               const itemDate = parseISO(item.schedule_date);
               return format(itemDate, 'yyyy-MM-dd') === format(day, 'yyyy-MM-dd');
             });
@@ -698,7 +693,7 @@ export default function Dashboard() {
                   <input
                     type="text"
                     value={formData.title}
-                    onChange={(e) => setFormData({...formData, title: e.target.value })}
+                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
                     placeholder="Enter a title for this content"
                     required
