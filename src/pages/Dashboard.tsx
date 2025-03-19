@@ -1,15 +1,14 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { format, isBefore, startOfDay, parseISO, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isToday } from 'date-fns';
+import { format, isBefore, startOfDay, parseISO } from 'date-fns';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
-import { Calendar, List, Grid2X2, CheckCircle2, XCircle, ExternalLink, Loader2, Plus, X, CalendarIcon, Archive, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Calendar, List, Grid2X2, CheckCircle2, XCircle, ExternalLink, Loader2, Plus, X, CalendarIcon, Archive } from 'lucide-react';
 import Header from '../components/Header';
 
 type ViewMode = 'list' | 'type' | 'calendar' | 'archive';
 type ContentItem = {
   id: string;
-  title: string;
   caption: string;
   content_type: 'Post' | 'Story' | 'Reel' | 'TikTok';
   media_url: string;
@@ -25,7 +24,6 @@ type ContentItem = {
 
 export default function Dashboard() {
   const [viewMode, setViewMode] = useState<ViewMode>('list');
-  const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedType, setSelectedType] = useState<string>('all');
   const [selectedStatus, setSelectedStatus] = useState<string>('all');
   const [selectedClient, setSelectedClient] = useState<string>('all');
@@ -33,7 +31,6 @@ export default function Dashboard() {
   const [rejectionNotes, setRejectionNotes] = useState<string>('');
   const [rejectingItemId, setRejectingItemId] = useState<string | null>(null);
   const [formData, setFormData] = useState({
-    title: '',
     caption: '',
     content_type: 'Post',
     media_url: '',
@@ -44,18 +41,6 @@ export default function Dashboard() {
   const { profile } = useAuth();
   const isAdmin = profile?.email === 'geral@stagelink.pt';
   const today = startOfDay(new Date());
-
-  const monthStart = startOfMonth(currentDate);
-  const monthEnd = endOfMonth(currentDate);
-  const daysInMonth = eachDayOfInterval({ start: monthStart, end: monthEnd });
-
-  const previousMonth = () => {
-    setCurrentDate(prev => new Date(prev.getFullYear(), prev.getMonth() - 1));
-  };
-
-  const nextMonth = () => {
-    setCurrentDate(prev => new Date(prev.getFullYear(), prev.getMonth() + 1));
-  };
 
   const { data: profiles = [] } = useQuery({
     queryKey: ['profiles'],
@@ -107,14 +92,7 @@ export default function Dashboard() {
   }, { currentContent: [] as ContentItem[], archivedContent: [] as ContentItem[] });
 
   const filteredItems = contentItems.filter(item => {
-    // Show all content in calendar view
-    if (viewMode === 'calendar') {
-      return true;
-    }
-    
-    if (viewMode === 'archive') {
-      return isBefore(startOfDay(parseISO(item.schedule_date)), today);
-    }
+    if (viewMode === 'archive') return isBefore(startOfDay(parseISO(item.schedule_date)), today);
     
     const isCurrentContent = !isBefore(startOfDay(parseISO(item.schedule_date)), today);
     const matchesType = selectedType === 'all' || item.content_type === selectedType;
@@ -139,7 +117,6 @@ export default function Dashboard() {
     if (!error) {
       setShowForm(false);
       setFormData({
-        title: '',
         caption: '',
         content_type: 'Post',
         media_url: '',
@@ -187,7 +164,7 @@ export default function Dashboard() {
   };
 
   const renderContentItem = (item: ContentItem) => (
-    <div key={item.id} className="bg-white p-4 sm:p-6 rounded-lg shadow-md space-y-4">
+    <div key={item.id} className="bg-white p-4 sm:p-6 rounded-lg shadow-md space-y-4 w-full">
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
         <div className="space-y-2">
           <span className="inline-block px-3 py-1 bg-black text-white rounded-full text-sm">
@@ -216,9 +193,6 @@ export default function Dashboard() {
           </div>
         )}
       </div>
-      {item.title && (
-        <h3 className="text-lg font-medium text-gray-900">{item.title}</h3>
-      )}
       <p className="text-gray-700 break-words whitespace-pre-wrap">{item.caption}</p>
       <div className="flex flex-wrap items-center gap-2 text-sm text-gray-500">
         <a
@@ -325,9 +299,6 @@ export default function Dashboard() {
                         </div>
                       )}
                     </div>
-                    {item.title && (
-                      <h4 className="text-base font-medium text-gray-900">{item.title}</h4>
-                    )}
                     <p className="text-gray-700 text-sm whitespace-pre-wrap">{item.caption}</p>
                     <div className="flex flex-wrap items-center gap-2 text-sm text-gray-500">
                       <a
@@ -379,115 +350,33 @@ export default function Dashboard() {
       );
     }
 
+    const itemsByDate = filteredItems.reduce((acc, item) => {
+      const date = format(new Date(item.schedule_date), 'yyyy-MM-dd');
+      if (!acc[date]) acc[date] = [];
+      acc[date].push(item);
+      return acc;
+    }, {} as Record<string, ContentItem[]>);
+
+    if (Object.keys(itemsByDate).length === 0) {
+      return (
+        <div className="text-center py-12">
+          <p className="text-gray-500">No content scheduled</p>
+        </div>
+      );
+    }
+
     return (
-      <div className="p-4">
-        <div className="flex items-center justify-between mb-8">
-          <h2 className="text-2xl font-bold">
-            {format(currentDate, 'MMMM yyyy')}
-          </h2>
-          <div className="flex gap-2">
-            <button
-              onClick={previousMonth}
-              className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-            >
-              <ChevronLeft className="w-5 h-5" />
-            </button>
-            <button
-              onClick={nextMonth}
-              className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-            >
-              <ChevronRight className="w-5 h-5" />
-            </button>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-7 gap-px bg-gray-200 rounded-lg overflow-hidden">
-          {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
-            <div
-              key={day}
-              className="bg-gray-50 p-4 text-center text-sm font-semibold"
-            >
-              {day}
+      <div className="space-y-6 p-4">
+        {Object.entries(itemsByDate).map(([date, items]) => (
+          <div key={date} className="space-y-4">
+            <h3 className="text-xl font-semibold">
+              {format(new Date(date), 'MMMM d, yyyy')}
+            </h3>
+            <div className="grid gap-4">
+              {items.map(renderContentItem)}
             </div>
-          ))}
-
-          {daysInMonth.map((day) => {
-            const dayContent = filteredItems.filter(item => {
-              const itemDate = parseISO(item.schedule_date);
-              return format(itemDate, 'yyyy-MM-dd') === format(day, 'yyyy-MM-dd');
-            });
-            const isCurrentMonth = isSameMonth(day, currentDate);
-            const isCurrentDay = isToday(day);
-
-            return (
-              <div
-                key={day.toString()}
-                className={`relative min-h-[200px] ${
-                  isCurrentMonth ? 'bg-white' : 'bg-gray-50'
-                } ${isCurrentDay ? 'ring-2 ring-black ring-inset' : ''}`}
-              >
-                <div className="sticky top-0 bg-inherit p-2 z-10 border-b">
-                  <div className="flex justify-between items-center">
-                    <span
-                      className={`text-sm font-medium ${
-                        isCurrentMonth ? 'text-gray-900' : 'text-gray-400'
-                      }`}
-                    >
-                      {format(day, 'd')}
-                    </span>
-                    {dayContent.length > 0 && (
-                      <span className="text-xs font-medium bg-gray-100 px-2 py-0.5 rounded-full">
-                        {dayContent.length}
-                      </span>
-                    )}
-                  </div>
-                </div>
-                {dayContent.length > 0 && (
-                  <div className="p-2 space-y-2 max-h-[300px] overflow-y-auto">
-                    {dayContent.map(content => (
-                      <div
-                        key={content.id}
-                        className="bg-white border rounded-md p-2 shadow-sm hover:shadow-md transition-shadow"
-                      >
-                        <div className="space-y-1.5">
-                          <div className="flex items-start justify-between gap-2">
-                            <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${
-                              content.status === 'Approved' ? 'bg-green-100 text-green-800' :
-                              content.status === 'Rejected' ? 'bg-red-100 text-red-800' :
-                              'bg-yellow-100 text-yellow-800'
-                            }`}>
-                              {content.status}
-                            </span>
-                            <span className="px-2 py-0.5 text-xs font-medium bg-gray-100 text-gray-800 rounded-full">
-                              {content.content_type}
-                            </span>
-                          </div>
-                          <h4 className="text-sm font-medium text-gray-900 line-clamp-2">
-                            {content.title || 'Untitled'}
-                          </h4>
-                          {isAdmin && content.assigned_to_profile && (
-                            <div className="text-xs text-gray-500">
-                              {content.assigned_to_profile.full_name || content.assigned_to_profile.email}
-                            </div>
-                          )}
-                          <a
-                            href={content.media_url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex items-center text-xs text-gray-600 hover:text-black"
-                          >
-                            <ExternalLink className="w-3 h-3 mr-1" />
-                            View Content
-                          </a>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
+          </div>
+        ))}
       </div>
     );
   };
@@ -689,20 +578,6 @@ export default function Dashboard() {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Title
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.title}
-                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
-                    placeholder="Enter a title for this content"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
                     Caption
                   </label>
                   <textarea
@@ -742,9 +617,16 @@ export default function Dashboard() {
                         value={formData.schedule_date}
                         onChange={(e) => setFormData({ ...formData, schedule_date: e.target.value })}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
+                        style={{
+                          colorScheme: 'light',
+                          '::-webkit-calendar-picker-indicator': {
+                            cursor: 'pointer',
+                            filter: 'invert(0.5)',
+                          },
+                        }}
                         required
                       />
-                      <CalendarIcon className="absolute right-3 top-2.5 w-5 h-5 text-gray-400" />
+                      <CalendarIcon className="absolute right-3 top-2.5 w-5 h-5 text-gray-400 pointer-events-none" />
                     </div>
                   </div>
                 </div>
