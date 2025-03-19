@@ -193,7 +193,7 @@ export default function Dashboard() {
           </div>
         )}
       </div>
-      <p className="text-gray-700 break-words">{item.caption}</p>
+      <p className="text-gray-700 break-words whitespace-pre-wrap">{item.caption}</p>
       <div className="flex flex-wrap items-center gap-2 text-sm text-gray-500">
         <a
           href={item.media_url}
@@ -299,7 +299,7 @@ export default function Dashboard() {
                         </div>
                       )}
                     </div>
-                    <p className="text-gray-700 text-sm line-clamp-3">{item.caption}</p>
+                    <p className="text-gray-700 text-sm whitespace-pre-wrap">{item.caption}</p>
                     <div className="flex flex-wrap items-center gap-2 text-sm text-gray-500">
                       <a
                         href={item.media_url}
@@ -583,7 +583,8 @@ export default function Dashboard() {
                   <textarea
                     value={formData.caption}
                     onChange={(e) => setFormData({ ...formData, caption: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black font-mono"
+                    style={{ whiteSpace: 'pre-wrap' }}
                     required
                     rows={4}
                   />
